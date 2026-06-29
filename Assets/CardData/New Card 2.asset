@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: New Card 2
   m_EditorClassIdentifier: Assembly-CSharp:CardMaker:Card
-  cardName: 
-  cardType: 0
+  cardName: wa
+  cardType: 1
   damage: 0
   heal: 0
   damageType: 

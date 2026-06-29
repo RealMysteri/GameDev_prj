@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: New Card 1
   m_EditorClassIdentifier: Assembly-CSharp:CardMaker:Card
-  cardName: 
-  cardType: 0
-  damage: 0
-  heal: 0
+  cardName: yest
+  cardType: 1
+  damage: 2
+  heal: 4
   damageType: 
   sprite: {fileID: 0}
