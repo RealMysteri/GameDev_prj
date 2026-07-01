@@ -10,7 +10,7 @@ public class playermovement : MonoBehaviour
     private Rigidbody2D rb;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
@@ -19,11 +19,13 @@ public class playermovement : MonoBehaviour
     void Update()
     {
         float x = Input.GetAxis("Horizontal");
-        float y = Input.GetAxis("Vertical");
 
-        Vector2 movement = new Vector2(x,y) * speed;
+        rb.linearVelocity = new Vector2(x * speed,rb.linearVelocity.y);
 
-        rb.linearVelocity = movement;
+        if (Input.GetKey(KeyCode.Space))
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, speed);
+        }
     
     }
 }

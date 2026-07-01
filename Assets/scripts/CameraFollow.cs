@@ -23,7 +23,7 @@ public class CameraFollow : MonoBehaviour
     {
         //transform.position = Vector3.SmoothDamp(transform.position, new Vector3(currentposx,transform.position.y,transform.position.z),ref velocity ,speed);
 
-        transform.position = new Vector3(player.position.x + lookahead, player.position.y, player.position.z);
+        transform.position = new Vector3(player.position.x + lookahead, player.position.y, transform.position.z);
         lookahead = Mathf.Lerp(lookahead, (aheadistance * player.localScale.x), Time.deltaTime * cameraspeed);
     }
 
