@@ -18,13 +18,19 @@ public class CameraFollow : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
+
+    void FixedUpdate()
     {
         //transform.position = Vector3.SmoothDamp(transform.position, new Vector3(currentposx,transform.position.y,transform.position.z),ref velocity ,speed);
 
         transform.position = new Vector3(player.position.x + lookahead, player.position.y, transform.position.z);
         lookahead = Mathf.Lerp(lookahead, (aheadistance * player.localScale.x), Time.deltaTime * cameraspeed);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
     }
 
     public void movetowards(Transform _newspace)
