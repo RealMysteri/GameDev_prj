@@ -1,21 +1,36 @@
- using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class playermovement : MonoBehaviour
 {
 
-    public float speed = 5;
+    [SerializeField] private float movespeed = 5f;
+    [SerializeField] private float acceleration = 35f;
+    [SerializeField] private float deceleration = 35f;
+    [SerializeField] private float airacceleration = 5f;
 
-    public float drag = 0.9f;
+    [SerializeField] private float jumpspeed = 7f;
+    [SerializeField] private float coyotejump = 0.15f;
+    [SerializeField] private float jumpbuffertime = 0.15f;
+    [SerializeField] private float jumpmultiplier = 0.5f;
+
+    [SerializeField] private float friction = 0.9f;
+    [SerializeField] public BoxCollider2D groundcheck;
+    [SerializeField] public LayerMask groundmask;
 
     private Rigidbody2D rb;
 
-    public BoxCollider2D groundcheck;
+    private bool jumppressed;
+    private bool isgrounded;
+    private float xinput;
 
-    public LayerMask groundmask;
+    private float coyotecounter;
+    private float jumpbuffercount;
 
-    public bool isgrounded;
 
     // Start is called before the first frame update
     void Awake()
@@ -26,34 +41,63 @@ public class playermovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float x = Input.GetAxis("Horizontal");
-
-        if (Mathf.Abs(x) > 0)
-        {
-            rb.linearVelocity = new Vector2(x * speed,rb.linearVelocity.y);
-        }
-
-
-        if (Input.GetKey(KeyCode.Space))
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, speed);
-        }
-
-    
+        GetInput();
+        DirectionLook();
     }
 
     void FixedUpdate()
     {
         CheckGround();
-        rb.linearVelocity *= drag;
+        Move();
+        jump();
+        ApplyDrag();
+    }
+
+    void GetInput()
+    {
+        xinput = Input.GetAxisRaw("Horizontal");
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumppressed = true;
+        }
+    }
+
+    void Move()
+    {
+        rb.linearVelocity = new Vector2(xinput * movespeed, rb.linearVelocity.y);
+    }
+
+    void jump()
+    {
+        if (jumppressed && isgrounded)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpspeed);
+        }
+
+        jumppressed = false;
+    }
+
+    void DirectionLook()
+    {
+        if (xinput == 0)
+        {
+            return;
+        }
+
+        transform.localScale = new Vector3(Math.Sign(xinput),1,1);
+    }
+
+    void ApplyDrag()
+    {
+        if (isgrounded && xinput == 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x * friction, rb.linearVelocity.y);
+        }
     }
 
     void CheckGround()
     {
-        Debug.Log(isgrounded);
-        Debug.Log(Physics2D.OverlapAreaAll(groundcheck.bounds.min, groundcheck.bounds.max,groundmask).Length);
-        isgrounded = Physics2D.OverlapAreaAll(groundcheck.bounds.min, groundcheck.bounds.max,groundmask).Length > 0;
-        
+        isgrounded = Physics2D.OverlapArea(groundcheck.bounds.min, groundcheck.bounds.max,groundmask);
     }
 }
 
