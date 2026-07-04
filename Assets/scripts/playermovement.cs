@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -14,19 +15,17 @@ public class playermovement : MonoBehaviour
     [SerializeField] private float airacceleration = 5f;
 
     [SerializeField] private float jumpspeed = 7f;
-    [SerializeField] private float coyotejump = 0.15f;
+    [SerializeField] private float coyotetime = 0.15f;
     [SerializeField] private float jumpbuffertime = 0.15f;
     [SerializeField] private float jumpmultiplier = 0.5f;
 
-    [SerializeField] private float friction = 0.9f;
     [SerializeField] public BoxCollider2D groundcheck;
     [SerializeField] public LayerMask groundmask;
 
     private Rigidbody2D rb;
 
-    private bool jumppressed;
     private bool isgrounded;
-    private float xinput;
+    private float xinput;       
 
     private float coyotecounter;
     private float jumpbuffercount;
@@ -43,14 +42,16 @@ public class playermovement : MonoBehaviour
     {
         GetInput();
         DirectionLook();
+        JumpBuffer();
+
     }
 
     void FixedUpdate()
     {
         CheckGround();
+        UdpateCoyoteTime();
         Move();
-        jump();
-        ApplyDrag();
+        Jump();
     }
 
     void GetInput()
@@ -58,23 +59,63 @@ public class playermovement : MonoBehaviour
         xinput = Input.GetAxisRaw("Horizontal");
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            jumppressed = true;
+            jumpbuffercount = jumpbuffertime;
         }
     }
 
     void Move()
     {
-        rb.linearVelocity = new Vector2(xinput * movespeed, rb.linearVelocity.y);
-    }
+        float targetspeed = xinput * movespeed;
 
-    void jump()
-    {
-        if (jumppressed && isgrounded)
+        float accelrate;
+
+        if (isgrounded)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpspeed);
+            accelrate = (MathF.Abs(targetspeed) > 0.01f) ? acceleration : deceleration;
+        }
+        else
+        {
+            accelrate = airacceleration;
         }
 
-        jumppressed = false;
+        float newSpeed = Mathf.MoveTowards(rb.linearVelocity.x, targetspeed, accelrate * Time.deltaTime);
+        rb.linearVelocity = new Vector2(newSpeed, rb.linearVelocity.y);
+    }
+
+    void Jump()
+    {
+        if (jumpbuffercount > 0 && coyotecounter > 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpspeed);
+
+            jumpbuffercount = 0;
+            coyotecounter = 0;
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space) && rb.linearVelocity.y > 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpmultiplier);
+        }
+    }
+
+    void JumpBuffer()
+    {
+        if (jumpbuffercount > 0)
+        {
+            jumpbuffercount -= Time.deltaTime;
+        }
+    }
+
+    void UdpateCoyoteTime()
+    {
+        if (isgrounded)
+        {
+            coyotecounter = coyotetime;
+        }
+        else
+        {
+            coyotecounter -= Time.fixedDeltaTime;
+        }
     }
 
     void DirectionLook()
@@ -85,14 +126,6 @@ public class playermovement : MonoBehaviour
         }
 
         transform.localScale = new Vector3(Math.Sign(xinput),1,1);
-    }
-
-    void ApplyDrag()
-    {
-        if (isgrounded && xinput == 0)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x * friction, rb.linearVelocity.y);
-        }
     }
 
     void CheckGround()
