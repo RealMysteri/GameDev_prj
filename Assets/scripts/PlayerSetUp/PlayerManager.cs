@@ -1,12 +1,18 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using CardMaker;
+using NUnit.Framework.Internal;
 
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private int maxhealth = 100;
     [SerializeField] private int currenthealth;
+
+    [SerializeField] private int ActionPoint;
+    [SerializeField] private int MaxActionPoint;
 
     private Vector2 spawnpoint;
     private bool isdead = false;
@@ -18,6 +24,10 @@ public class PlayerManager : MonoBehaviour
     
     [SerializeField] private ImmobileEnemeyManager enemy;
 
+    [SerializeField] private PlayerUi uiManager;
+
+    [SerializeField] private CardLoader cardLoader; 
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,6 +35,8 @@ public class PlayerManager : MonoBehaviour
         spawnpoint = transform.position;
         rb = GetComponent<Rigidbody2D>();
         movementscript = GetComponent<playermovement>();
+        ActionPoint = MaxActionPoint;
+        
     }
 
     // Update is called once per frame
@@ -32,9 +44,14 @@ public class PlayerManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Keypad1))
         {
-            if (enemy != null)
+            int ActionPointcost = 1;
+            if(checkAP(ActionPointcost))
             {
-                enemy.Takedamage(damage);
+                if (enemy != null)
+                {
+                    enemy.Takedamage(damage);
+                    ActionPoint -= ActionPointcost;
+                }
             }
         }
 
@@ -47,6 +64,8 @@ public class PlayerManager : MonoBehaviour
         {
             TakeDamage(15); 
         }
+
+        UpdatePlayerUI();
     }
 
     public void TakeDamage(int damage)
@@ -60,6 +79,7 @@ public class PlayerManager : MonoBehaviour
 
         if (currenthealth <= 0)
         {
+            currenthealth = 0;
             Die();
         }
     }
@@ -93,7 +113,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void Heal(int amount)
+    public void Heal(int amount)
     {
         if (isdead)
         {
@@ -102,4 +122,32 @@ public class PlayerManager : MonoBehaviour
 
         currenthealth = Mathf.Min(currenthealth + amount,maxhealth);
     }
+
+    private bool checkAP (int amt)
+    {
+        return (ActionPoint - amt) >= 0;
+    }
+
+    public void UseAP(int amount)
+    {
+        ActionPoint -= amount;
+    }
+
+    public int CurrentAP
+    {
+        get {return ActionPoint;}
+    }
+
+    public void GainAP(int amount)
+    {
+        ActionPoint = Mathf.Min(ActionPoint + amount,MaxActionPoint);
+    }
+
+    private void UpdatePlayerUI()
+{
+    if (uiManager != null)
+    {
+        uiManager.UpdateDisplay(currenthealth, maxhealth, ActionPoint, MaxActionPoint);
+    }
+}
 }

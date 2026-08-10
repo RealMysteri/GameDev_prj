@@ -1,9 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Mathematics;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class playermovement : MonoBehaviour
@@ -19,12 +16,16 @@ public class playermovement : MonoBehaviour
     [SerializeField] private float jumpbuffertime = 0.15f;
     [SerializeField] private float jumpmultiplier = 0.5f;
 
-    [SerializeField] public BoxCollider2D groundcheck;
-    [SerializeField] public LayerMask groundmask;
+    [SerializeField] private float GravityMulti;
+
+    [SerializeField] private float maxfallspeed ;
+    [SerializeField] private float defaultgravity;
+    [SerializeField] public PlayerManager player;
 
     private Rigidbody2D rb;
 
-    private bool isgrounded;
+    [SerializeField] private bool isgrounded;
+    private bool ismoving;
     private float xinput;       
 
     private float coyotecounter;
@@ -35,6 +36,7 @@ public class playermovement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        defaultgravity = rb.gravityScale;
     }
 
     // Update is called once per frame
@@ -49,9 +51,11 @@ public class playermovement : MonoBehaviour
     void FixedUpdate()
     {
         CheckGround();
+        CheckMove();
         UdpateCoyoteTime();
         Move();
         Jump();
+        Gravity();
     }
 
     void GetInput()
@@ -60,6 +64,15 @@ public class playermovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             jumpbuffercount = jumpbuffertime;
+        }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (ismoving && isgrounded)
+            {
+                RegenAP();
+            }
+        
         }
     }
 
@@ -130,7 +143,33 @@ public class playermovement : MonoBehaviour
 
     void CheckGround()
     {
-        isgrounded = Physics2D.OverlapArea(groundcheck.bounds.min, groundcheck.bounds.max,groundmask);
+        isgrounded =  Mathf.Approximately(rb.linearVelocity.y, 0f);
+    }
+
+    void CheckMove()
+    {
+        ismoving =  Mathf.Approximately(rb.linearVelocity.x, 0f);
+    }
+
+    void Gravity()
+    {
+        if(rb.linearVelocity.y < -0.01f)
+        {
+            rb.gravityScale = defaultgravity * GravityMulti;
+
+            float clampedY = MathF.Max(rb.linearVelocity.y, -maxfallspeed);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, clampedY);
+        }
+        else
+        {
+            rb.gravityScale = defaultgravity;
+        }
+    }
+
+    void RegenAP()
+    {
+        
+        player.GainAP(10);
     }
 }
 
