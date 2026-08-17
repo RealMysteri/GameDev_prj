@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class playermovement : MonoBehaviour
@@ -20,21 +21,25 @@ public class playermovement : MonoBehaviour
 
     [SerializeField] private float maxfallspeed ;
     [SerializeField] private float defaultgravity;
-    [SerializeField] public PlayerManager player;
+
+    public float Lastforcey = 0f;
 
     private Rigidbody2D rb;
 
-    [SerializeField] private bool isgrounded;
-    private bool ismoving;
+    [SerializeField] public bool isgrounded;
+    [SerializeField] public bool ismoving;
     private float xinput;       
 
     private float coyotecounter;
     private float jumpbuffercount;
 
+    public static playermovement current;
+
 
     // Start is called before the first frame update
     void Awake()
     {
+        current = this;
         rb = GetComponent<Rigidbody2D>();
         defaultgravity = rb.gravityScale;
     }
@@ -45,13 +50,13 @@ public class playermovement : MonoBehaviour
         GetInput();
         DirectionLook();
         JumpBuffer();
-
+        CheckGround();
+        CheckMove();
     }
 
     void FixedUpdate()
     {
-        CheckGround();
-        CheckMove();
+
         UdpateCoyoteTime();
         Move();
         Jump();
@@ -60,21 +65,15 @@ public class playermovement : MonoBehaviour
 
     void GetInput()
     {
-        xinput = Input.GetAxisRaw("Horizontal");
+            xinput = Input.GetAxisRaw("Horizontal");
         if (Input.GetKeyDown(KeyCode.Space))
         {
             jumpbuffercount = jumpbuffertime;
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            if (ismoving && isgrounded)
-            {
-                RegenAP();
-            }
-        
-        }
+
     }
+
 
     void Move()
     {
@@ -133,22 +132,44 @@ public class playermovement : MonoBehaviour
 
     void DirectionLook()
     {
+        float sizechange = 0f;
         if (xinput == 0)
         {
             return;
         }
 
-        transform.localScale = new Vector3(Math.Sign(xinput),1,1);
+        if (Math.Sign(xinput) > 0)
+        {
+            sizechange = 0.5f;
+        }
+        else
+        {
+            sizechange = -0.5f;
+        }
+        transform.localScale = new Vector3((Math.Sign(xinput) - sizechange),0.5f,0.5f);
     }
 
     void CheckGround()
     {
-        isgrounded =  Mathf.Approximately(rb.linearVelocity.y, 0f);
+        if(math.abs(rb.linearVelocity.y) < 0.1f)
+        {
+            if(Lastforcey < 0f && rb.linearVelocity.y > Lastforcey)
+            {
+                isgrounded = true;                 
+            }
+
+        }
+        else
+        {
+            isgrounded = false;
+        }
+        Lastforcey = rb.linearVelocity.y;
+
     }
 
     void CheckMove()
     {
-        ismoving =  Mathf.Approximately(rb.linearVelocity.x, 0f);
+        ismoving =  !(Mathf.Approximately(rb.linearVelocity.x, 0f));
     }
 
     void Gravity()
@@ -166,10 +187,6 @@ public class playermovement : MonoBehaviour
         }
     }
 
-    void RegenAP()
-    {
-        
-        player.GainAP(10);
-    }
+
 }
 

@@ -1,0 +1,96 @@
+
+{
+    "cards":
+    [
+        {
+            "id": 0,
+            "cardName": "Draw",
+            "effect" : 0,
+            "cardType": 5,
+            "damage": 0,
+            "heal": 0,
+            "actionPointCost": 1,
+            "drawAmount": 1,
+            "breakEnviroment": 0,
+            "information": "Draw one",
+            "damageType": [
+            1
+            ]
+        },
+        {
+            "id": 1,
+            "cardName": "celestite slash",
+            "effect" : 1,
+            "cardType": 4,
+            "damage": 15,
+            "heal": 0,
+            "actionPointCost": 1,
+            "drawAmount": 0,
+            "breakEnviroment": 0,
+            "information": "front slash deaing 15 damage",
+            "damageType": [
+            1
+            ]
+        },
+        {
+            "id": 2,
+            "cardName": "fluorite heal",
+            "effect" : 2,
+            "cardType": 0,
+            "damage": 0,
+            "heal": 20,
+            "actionPointCost": 1,
+            "drawAmount": 0,
+            "breakEnviroment": 0,
+            "information": "heals 10 health",
+            "damageType": [
+            0
+            ]
+        }  ,
+        {            
+            "id": 3,
+            "cardName": "Howlite Blade",
+            "effect" : 3,
+            "cardType": 2,
+            "damage": 25,
+            "heal": 1,
+            "actionPointCost": 1,
+            "drawAmount": 0,
+            "breakEnviroment": 0,
+            "information": "does an aoe smash effect on the ground dealing damage ",
+            "damageType": [
+            0
+            ]
+        },
+        {            
+            "id": 4,
+            "cardName": "Freedraw",
+            "effect" : 4,
+            "cardType": 0,
+            "damage": 0,
+            "heal": 1,
+            "actionPointCost": 1,
+            "drawAmount": 3,
+            "breakEnviroment": 0,
+            "information": "your next 3 draws are free",
+            "damageType": [
+            0
+            ]
+        },
+        {            
+            "id": 5,
+            "cardName": "Pyrite AP",
+            "effect" : 5,
+            "cardType": 1,
+            "damage": 0,
+            "heal": 0,
+            "actionPointCost": 1,
+            "drawAmount": 3,
+            "breakEnviroment": 0,
+            "information": "Gain 3 AP",
+            "damageType": [
+            0
+            ]
+        }
+    ]
+}
